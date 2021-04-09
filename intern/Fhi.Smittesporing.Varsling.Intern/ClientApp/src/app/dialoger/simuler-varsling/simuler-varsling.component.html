@@ -1,0 +1,51 @@
+<div class="modal-header">
+	<h4 class="modal-title">Varslingssimulering</h4>
+	<button type="button" class="close" aria-label="Close" (click)="activeModal.close(false)">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+<div *ngIf="!laster" class="modal-body">
+	<div *ngIf="simulering">
+		Antall kontakter: {{simulering.antallKontakter}}<br />
+		Antall vil varsles: {{simulering.antallKontakterTilVarsling}}
+	</div>
+	<table class="table table-hover text-center">
+	<thead>
+	<tr>
+		<th scope="col">#</th>
+		<th scope="col">Blir varslet</th>
+		<th scope="col">Avvist av regler</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr scope="row" *ngFor="let smittekontakt of smittekontakter.resultater; let i=index">
+		<td>{{i+1+(smittekontakter.sideindeks*smittekontakter.sideantall)}}</td>
+		<td>{{simuleringDetaljerMap[smittekontakt.smittekontaktId].kanVarsles ? 'Ja' : 'Nei'}}</td>
+		<td>
+			<ul class="list-group list-group-flush">
+				<li class="list-group-item" *ngFor="let avvistAvRegel of simuleringDetaljerMap[smittekontakt.smittekontaktId].varselIkkeTillatAvRegler"
+					[title]="avvistAvRegel.beskrivelse">
+					{{avvistAvRegel.navn}}
+				</li>
+				<li class="list-group-item" *ngIf="!simuleringDetaljerMap[smittekontakt.smittekontaktId].varselIkkeTillatAvRegler.length"
+					title="Alle varslingsregler tillater varsling til denne smittekontakten">
+					-
+				</li>
+			</ul>
+		</td>
+	</tr>
+	</tbody>
+	</table>
+	<ngb-pagination
+		[(page)]="aktivSide"
+		[pageSize]="smittekontakter.sideantall"
+		[collectionSize]="smittekontakter.totaltAntall"
+		[maxSize]="5"
+		[boundaryLinks]="true"
+		>
+	</ngb-pagination>
+</div>
+<div class="modal-footer">
+	<button type="button" class="btn" (click)="activeModal.close(false)">Lukk</button>
+	<button type="button" class="btn btn-primary" (click)="godkjenn()">Godkjenn</button>
+</div>

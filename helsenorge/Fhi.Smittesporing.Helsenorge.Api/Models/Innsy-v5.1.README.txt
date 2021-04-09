@@ -1,0 +1,14 @@
+﻿I denne løsningen benyttes Xml.exe til å generere Innsyn_v5_1.cs med følgende kommando:
+
+"xsd.exe" Innsyn-v5.1.xsd /c /n:Fhi.Smittesporing.Helsenorge.Api.Models /outputdir:.
+
+(Denne kan kommandoen er kommentert ut i pre-build-steget til dette prosjektet.)
+
+NB: På grunn av feil i Xml.exe så vil den feilaktig generere multidimensjonale arrays i Innsyn_v5_1.cs.
+Filen må derfor redigeres manuelt etter den er generert: [][] må erstattes med []
+
+//TABLE: pga "feil" eller mangler i hvordan XSD.exe fungerer blir ikke TABLE modellert korrekt og kan kun ha en rad,
+//dette må fikses manuelt ved å definere en egen TABLEROW-classe, løsningen som er på plass er lånt fra MFR
+
+For senere oppsett med automatisk generering av innsyn kan følgende brukes som utgangspunkt:
+"$(SolutionDir)Lib\xsd.exe" $(ProjectDir)Innsyn-v5.1.xsd /c /n:Fhi.Sysvak.Dto.HelseNorge /outputdir:$(ProjectDir)

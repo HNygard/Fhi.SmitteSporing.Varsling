@@ -1,0 +1,9 @@
+.list-group-item {
+	padding-top: 0.25rem;
+	padding-bottom: 0.25rem;
+}
+
+.modal-body {
+	max-height: calc(100vh - 300px);
+	overflow-y: auto;
+}

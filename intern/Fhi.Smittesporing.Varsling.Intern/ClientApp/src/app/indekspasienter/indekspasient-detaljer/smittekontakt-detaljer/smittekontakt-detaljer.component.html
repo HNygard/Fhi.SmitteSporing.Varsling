@@ -1,0 +1,129 @@
+<h1>Risikorapport for Smittekontakt #{{smittekontaktId}}</h1>
+
+
+<div *ngIf="!laster">
+	<div class="card">
+		<div class="card-body">
+			<h2 class="card-title">Oppsummering kontakt med Indekspasient <a routerLink="../../">#{{indekspasientId}}</a></h2>
+			<table class="table tilfelletable">
+				<thead></thead>
+				<tbody>
+					<tr>
+						<th scope="row">Rapportversjon</th>
+						<td>{{smittekontakt.pipelineVersjon || '-'}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Enhetsinfo</th>
+						<td class="device-list-cell">
+							<ul class="list-group list-group-flush">
+								<li class="list-group-item" *ngFor="let x of smittekontakt.enhetsinfo">
+									{{x}}
+								</li>
+							</ul>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">Akkumulert risiko BT</th>
+						<td>{{smittekontakt.bluetoothAkkumulertRisikoscore | number:'1.2-5'}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Akkumulert risiko GPS</th>
+						<td>{{smittekontakt.gpsAkkumulertRisikoscore | number:'1.2-5'}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Akkumulert varighet BT</th>
+						<td>{{smittekontakt.bluetoothAkkumulertVarighet | appDuration}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Varighet veldig nær kontakt BT (&lt;1m)</th>
+						<td>{{smittekontakt.bluetoothVeldigNarVarighet | appDuration}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Varighet nær kontakt BT (1-2m)</th>
+						<td>{{smittekontakt.bluetoothNarVarighet | appDuration}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Varighet relativt nær kontakt BT (2-5m)</th>
+						<td>{{smittekontakt.bluetoothRelativtNarVarighet | appDuration}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Akkumulert varighet GPS</th>
+						<td>{{smittekontakt.gpsAkkumulertVarighet | appDuration}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Antall kontakter</th>
+						<td>{{smittekontakt.antallKontakter}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Antall dager med kontakt</th>
+						<td>{{smittekontakt.antallDagerMedKontakt}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Antall dager med kontakt BT</th>
+						<td>{{smittekontakt.bluetoothAntallDagerMedKontakt}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Antall dager med kontakt GPS</th>
+						<td>{{smittekontakt.gpsAntallDagerMedKontakt}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Points of interests</th>
+						<td class="poi-list-cell">
+							<ul class="list-group list-group-flush">
+								<li class="list-group-item" *ngFor="let x of smittekontakt.interessepunkter | keyvalue">
+									{{x.key}}
+								</li>
+							</ul>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<img *ngIf="smittekontakt.harKontaktDiagram" [src]="oppsummertKontaktGrafUrl" />
+			<small *ngIf="!smittekontakt.harKontaktDiagram" class="form-text text-muted">Kontaktdiagram er ikke tilgjengelig</small>
+			<img *ngIf="smittekontakt.harGpsHistogram" [src]="gpsHistPlotUrl" />
+			<small *ngIf="!smittekontakt.harGpsHistogram" class="form-text text-muted">GPS-histogram er ikke tilgjengelig</small>
+		</div>
+	</div>
+	
+	<h2>Kontakter per dag</h2>
+	
+	<div *ngFor="let detaljer of smittekontakt.detaljer" class="card">
+		<div class="card-body">
+			<h3 class="card-title">{{detaljer.dato | date:'yyyy-MM-dd'}}</h3>
+			<table class="table tilfelletable">
+				<thead></thead>
+				<tbody>
+					<tr>
+						<th scope="row">Akkumulert varighet Blutooth</th>
+						<td>{{detaljer.bluetoothAkkumulertVarighet | appDuration}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Akkumulert varighet GPS</th>
+						<td>{{detaljer.gpsAkkumulertVarighet | appDuration}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Medianavstand GPS</th>
+						<td>{{detaljer.gpsMedianavstand | number:'1.2-2'}}{{detaljer.gpsMedianavstand ? 'm' : ''}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Points of interests</th>
+						<td class="poi-list-cell">
+							<ul class="list-group list-group-flush">
+								<li class="list-group-item" *ngFor="let x of detaljer.interessepunkter | keyvalue">
+									{{x.key}}
+								</li>
+							</ul>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<button class="btn btn-primary" *ngIf="!kartForDetaljerAktivt(detaljer.smittekontaktDetaljerId)" [disabled]="!detaljer.harKart" (click)="aktiverKartForDetaljer(detaljer.smittekontaktDetaljerId)">
+				Vis kart
+			</button>
+			<small *ngIf="!detaljer.harKart" class="form-text text-muted">Kart er ikke tilgjengelig for denne kontakten</small>
+			<div class="iframe-wrapper" *ngIf="kartForDetaljerAktivt(detaljer.smittekontaktDetaljerId)">
+				<iframe [src]="hentKartUrlForDag(detaljer.smittekontaktDetaljerId)" frameborder="0"></iframe>
+			</div>
+		</div>
+	</div>
+</div>

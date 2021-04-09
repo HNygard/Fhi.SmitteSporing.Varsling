@@ -1,0 +1,101 @@
+<div>
+	<a class="btn btn-secondary" routerLink="../">Tilbake til oversikt</a>
+</div>
+<div *ngIf="!laster">
+	<h2>Indekspasient #{{indekspasient.indekspasientId}}</h2>
+	<table class="table tilfelletable">
+		<thead></thead>
+		<tbody>
+			<tr>
+				<th scope="row">Fødselsnummer</th>
+				<td>{{fodselsnummerForPasient()}}</td>
+				<th scope="row">Telefon</th>
+				<td>{{telefonnummerForPasient()}}</td>
+				<td class="cell-btn"><button class="btn btn-primary" [disabled]="!kanDekryptereIndekspasient()" (click)="dekrypterIndekspasient()">Dekrypter</button></td>
+			</tr>
+			<tr>
+				<th scope="row">Registert</th>
+				<td>{{indekspasient.opprettettidspunkt | date:'dd.MM.yyyy HH:mm'}}</td>
+				<th scope="row">Prøvedato</th>
+				<td>{{indekspasient.provedato | date:'dd.MM.yyyy'}}</td>
+				<td></td>
+			</tr>
+			<tr>
+				<th scope="row">Status</th>
+				<td>{{indekspasient.status}}</td>
+				<th scope="row">Antall kontakter</th>
+				<td>{{indekspasient.antallSmittekontakter}}</td>
+				<td></td>
+			</tr>
+			<tr>
+				<th scope="row">Varsling</th>
+				<td>{{indekspasient.varslingsstatus}}</td>
+				<td colspan="3" class="cell-btn" [ngbTooltip]="!kanGodkjennes() && indekspasient.varslingsstatus == 'TilGodkjenning' ? 'Finnes ingen smittekontakter å varsle.' : ''"
+					placement="right">
+					<button class="btn btn-primary"
+						[disabled]="!kanGodkjennes()"
+						(click)="simulerVarsling()">Simuler varsling</button>
+					<button class="btn btn-primary"
+						[disabled]="!kanGodkjennes()"
+						(click)="godkjennVarsling()">Godkjenn varsling</button>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">Ferdig</th>
+				<td>{{erFerdig() ? 'Ja' : 'Nei'}}</td>
+				<td colspan="3" class="cell-btn">
+					<button class="btn btn-primary"
+						[disabled]="!kanSettesFerdig()"
+						(click)="markerVarslingFerdig()">Sett ferdig</button>
+				</td>
+			</tr>
+			<tr>
+			</tr>
+		</tbody>
+	</table>
+
+	<h2>Smittekontakter</h2>
+	<table class="table table-hover text-center">
+	<thead>
+	<tr>
+		<th scope="col">#</th>
+		<th scope="col">Telefonnummer</th>
+		<th scope="col">Risiko</th>
+		<th scope="col">Varighet</th>
+		<th scope="col">Sted</th>
+		<th scope="col">Antall</th>
+		<th scope="col">Siste</th>
+		<th scope="col">Varslet</th>
+		<th scope="col"></th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr scope="row" *ngFor="let smittekontakt of smittekontakter.resultater; let i=index">
+		<td>{{i+1+(smittekontakter.sideindeks*smittekontakter.sideantall)}}</td>
+		<td>{{telefonnummerForKontakt(smittekontakt)}}</td>
+		<td><a [routerLink]="['smittekontakter', smittekontakt.smittekontaktId]">{{smittekontakt.risikokategori}}</a></td>
+		<td><a [routerLink]="['smittekontakter', smittekontakt.smittekontaktId]">{{smittekontakt.bluetoothAkkumulertVarighet + smittekontakt.gpsAkkumulertVarighet | appDuration}}</a></td>
+		<td><a [routerLink]="['smittekontakter', smittekontakt.smittekontaktId]">{{hentStedsinfoFor(smittekontakt)}}</a></td>
+		<td><a [routerLink]="['smittekontakter', smittekontakt.smittekontaktId]">{{smittekontakt.antallKontakter}}</a></td>
+		<td><a [routerLink]="['smittekontakter', smittekontakt.smittekontaktId]">{{smittekontakt.sisteKontaktDato | date:'yyyy-MM-dd'}}</a></td>
+		<td>
+			<button *ngIf="smittekontakt.varsletTidspunkt" class="btn btn-link" (click)="visVarselinfo(smittekontakt.smittekontaktId)">
+				{{smittekontakt.varsletTidspunkt | date:'dd.MM.yyyy HH:mm'}}
+			</button>
+		</td>
+		<td class="cell-btn">
+			<button class="btn btn-primary" [disabled]="erKontaktDekryptert(smittekontakt)" (click)="dekrypterKontakt(smittekontakt)">Dekrypter</button>
+			<button class="btn btn-primary" [disabled]="smittekontakt.varsletTidspunkt != null" (click)="sendVarsel(smittekontakt)">Send Varsel</button>
+		</td>
+	</tr>
+	</tbody>
+	</table>
+	<ngb-pagination
+		[(page)]="aktivSide"
+		[pageSize]="smittekontakter.sideantall"
+		[collectionSize]="smittekontakter.totaltAntall"
+		[maxSize]="5"
+		[boundaryLinks]="true"
+		>
+	</ngb-pagination>
+</div>

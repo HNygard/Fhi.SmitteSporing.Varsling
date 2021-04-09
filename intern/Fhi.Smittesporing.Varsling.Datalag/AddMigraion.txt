@@ -1,0 +1,1 @@
+﻿Add-migration IkkeRegistrertKRK -project Fhi.Smittesporing.Varsling.Datalag -startupproject Fhi.Smittesporing.Varsling.Intern

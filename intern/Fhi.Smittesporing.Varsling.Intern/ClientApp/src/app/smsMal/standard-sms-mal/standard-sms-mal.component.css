@@ -1,0 +1,13 @@
+.card {
+	margin: 1em 0;
+}
+
+.testmelding-controls {
+	display: flex;
+	flex-direction: row;
+
+}
+
+.testmelding-controls .dropdown {
+	margin-right: 0.5em;
+}

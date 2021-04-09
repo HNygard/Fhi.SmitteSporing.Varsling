@@ -1,0 +1,20 @@
+.dropdown {
+	width: auto;
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.tlf-filter {
+	display: flex;
+	flex-direction: row;
+}
+
+.tlf-filter input {
+	width: 300px;
+}
+
+.cell-btn {
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+	vertical-align: middle;
+}

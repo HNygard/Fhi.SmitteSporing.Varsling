@@ -1,0 +1,74 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+  branches:
+    include:
+    - master
+    - develop
+    - feature/*
+  paths:
+    include:
+      - simula/felles/*
+      - simula/proxy/*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  prosjekterTilBygging: |
+    simula/felles/**/*.csproj
+    simula/proxy/**/*.csproj
+  prosjekterTilTesting: |
+    simula/felles/**/*.Tester.csproj
+    simula/proxy/**/*.Tester.csproj
+  prosjektTilPublisering: '**/Fhi.Smittesporing.Simula.ProxyServer.csproj'
+  publisertPakkenavn: 'Fhi.Smittesporing.Simula.ProxyServer'
+  Version.Major: 1
+  Version.Minor: 0
+  Version.Revision: $[counter(format('{0}.{1}', variables['Version.Major'], variables['Version.Minor']), 0)]
+  Version.Suffix: $[format('-{0}', variables['Build.SourceBranchName'])]
+
+name: $(Version.Major).$(Version.Minor).$(Version.Revision)$(Version.Suffix)
+
+steps:
+- task: DotNetCoreCLI@2
+  displayName: 'Installer nuget-pakker'
+  inputs:
+    command: 'restore'
+    projects: '$(prosjekterTilBygging)'
+    feedsToUse: 'config'
+    nugetConfigPath: 'NuGet.Config'
+    externalFeedCredentials: 'FHI Nuget - Read'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Bygg alle prosjekter'
+  inputs:
+    command: 'build'
+    projects: '$(prosjekterTilBygging)'
+    arguments: '--no-restore --configuration $(buildConfiguration) /property:Version=$(Version.Major).$(Version.Minor).$(Version.Revision)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Kjør tester'
+  inputs:
+    command: 'test'
+    projects: '$(prosjekterTilTesting)'
+    arguments: '--no-build --configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Pakk webapp'
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    projects: '$(prosjektTilPublisering)'
+    arguments: '--no-build --output $(build.artifactstagingdirectory) --configuration $(buildConfiguration)'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publiser artifakter'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: '$(publisertPakkenavn)'
+    publishLocation: 'Container'

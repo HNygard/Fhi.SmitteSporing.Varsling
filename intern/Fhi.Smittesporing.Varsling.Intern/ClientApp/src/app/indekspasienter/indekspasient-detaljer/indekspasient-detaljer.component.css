@@ -1,0 +1,25 @@
+table .btn {
+	margin-right: 0.5em;
+}
+
+table .btn:last-child {
+	margin-right: 0;
+}
+
+.tilfelletable {
+	width: auto;
+}
+
+.btn-link {
+	padding: 0;
+	margin: 0;
+	border: 0;
+	display: inline;
+	vertical-align: baseline;
+}
+
+.cell-btn {
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+	vertical-align: middle;
+}

@@ -1,0 +1,92 @@
+
+<div class="dropdown">
+  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <span *ngIf="!valgtKommune">Velg kommune</span>
+    <span *ngIf="valgtKommune">{{valgtKommune.navn}}</span>
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <button *ngIf="valgtKommune" (click)="velgKommune()" class="dropdown-item" type="button">Velg kommune</button>
+    <button *ngFor="let kommune of kommuneList" (click)="velgKommune(kommune)" class="dropdown-item" type="button">{{kommune.navn}}</button>
+  </div>
+</div>
+<div class="dropdown">
+  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <span *ngIf="visErFerdig === null">Velg varselstatus</span>
+    <span *ngIf="visErFerdig === true">Ferdig</span>
+    <span *ngIf="visErFerdig === false">Ikke ferdig</span>
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <button *ngIf="visErFerdig !== null" (click)="visErFerdig = null" class="dropdown-item" type="button">Fjern filter</button>
+    <button (click)="visErFerdig = true" class="dropdown-item" type="button">Ferdig</button>
+    <button (click)="visErFerdig = false" class="dropdown-item" type="button">Ikke ferdig</button>
+  </div>
+</div>
+<div class="dropdown">
+  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <span *ngIf="visMedSmittekontakt === null">Med/Uten smittekontakt?</span>
+    <span *ngIf="visMedSmittekontakt === true">Med smittekontakt</span>
+    <span *ngIf="visMedSmittekontakt === false">Uten smittekontakt</span>
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <button *ngIf="visMedSmittekontakt !== null" (click)="visMedSmittekontakt = null" class="dropdown-item" type="button">Fjern filter</button>
+    <button (click)="visMedSmittekontakt = true" class="dropdown-item" type="button">Med smittekontakt</button>
+    <button (click)="visMedSmittekontakt = false" class="dropdown-item" type="button">Uten smittekontakt</button>
+  </div>
+</div>
+<div class="form-group">
+  <label for="tlfFilter">Telefonnummer</label>
+  <div class="tlf-filter">
+    <input type="text" #tlfInput="ngModel" class="form-control" id="tlfFilter" [disabled]="!!aktivtTelefonnummerFilter" name="tlfFilter" [(ngModel)]="telefonnummerInput" aria-describedby="tlfFilterHjelp" pattern="^(\+\d|)\d+$">
+    <button class="btn btn-primary" *ngIf="!aktivtTelefonnummerFilter" [disabled]="tlfInput.errors" (click)="aktivtTelefonnummerFilter = telefonnummerInput">Søk</button>
+    <button class="btn btn-primary" *ngIf="aktivtTelefonnummerFilter" (click)="fjernTlfFilter()">Tøm</button>
+  </div>
+  <small id="tlfFilterHjelp" class="form-text text-muted">Søk på telefonnummer (logges)</small>
+</div>
+<hr />
+
+<div *ngIf="laster"><div class="col">Laster...</div></div>
+<div *ngIf="!laster">
+  <div *ngIf="indekspasienter">Antall: {{indekspasienter.totaltAntall}}</div>
+  <table class="table table-hover text-center">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">ID</th>
+        <th scope="col">Fødselsnummer</th>
+        <th scope="col">Telefon</th>
+        <th scope="col">Kommune</th>
+        <th scope="col">Registert</th>
+        <th scope="col">Prøvedato</th>
+        <th scope="col">Status</th>
+        <th scope="col">Kontakt</th>
+        <th scope="col">Ferdig</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr scope="row" *ngFor="let indekspasient of indekspasienter.resultater; let i=index">
+        <td [routerLink]="[indekspasient.indekspasientId]">{{i+1+(indekspasienter.sideindeks*indekspasienter.sideantall)}}</td>
+        <td [routerLink]="[indekspasient.indekspasientId]">{{indekspasient.indekspasientId}}</td>
+        <td [routerLink]="[indekspasient.indekspasientId]">{{fodselsnummerFor(indekspasient)}}</td>
+        <td [routerLink]="[indekspasient.indekspasientId]">{{telefonnummerFor(indekspasient)}}</td>
+        <td [routerLink]="[indekspasient.indekspasientId]">{{hentKommuneFor(indekspasient)}}</td>
+        <td [routerLink]="[indekspasient.indekspasientId]">{{indekspasient.opprettettidspunkt | date:'dd.MM.yyyy HH:mm'}}</td>
+        <td [routerLink]="[indekspasient.indekspasientId]">{{indekspasient.provedato | date:'dd.MM.yyyy'}}</td>
+        <td [routerLink]="[indekspasient.indekspasientId]">{{indekspasient.status}}</td>
+        <td [routerLink]="[indekspasient.indekspasientId]">{{indekspasient.antallSmittekontakter}}</td>
+        <td [routerLink]="[indekspasient.indekspasientId]">{{indekspasient.varslingsstatus == 'Ferdig' ? 'Ja' : 'Nei'}}</td>
+        <td class="cell-btn">
+          <button class="btn btn-primary" [disabled]="!kanDekrypteres(indekspasient)" (click)="dekrypter(indekspasient)">Dekrypter</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <ngb-pagination
+    [(page)]="aktivSide"
+    [pageSize]="indekspasienter.sideantall"
+    [collectionSize]="indekspasienter.totaltAntall"
+    [maxSize]="5"
+    [boundaryLinks]="true"
+    >
+  </ngb-pagination>
+</div>

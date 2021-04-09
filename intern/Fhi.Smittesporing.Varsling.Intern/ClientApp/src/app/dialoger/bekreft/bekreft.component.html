@@ -1,0 +1,13 @@
+<div class="modal-header">
+	<h4 class="modal-title">{{tittel || 'Bekreft'}}</h4>
+	<button type="button" class="close" aria-label="Close" (click)="activeModal.close(false)">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+<div class="modal-body">
+	<p>{{beskrivelse || 'Er du sikker?'}}</p>
+</div>
+<div class="modal-footer">
+	<button type="button" class="btn" (click)="activeModal.close(false)">{{avbrytTekst || 'Avbryt'}}</button>
+	<button type="button" class="btn btn-primary" (click)="activeModal.close(true)">{{bekreftTekst || 'Bekreft'}}</button>
+</div>

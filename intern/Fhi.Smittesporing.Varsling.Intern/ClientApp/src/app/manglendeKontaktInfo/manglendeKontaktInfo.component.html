@@ -1,0 +1,54 @@
+<div *ngIf="showRegistreringAlert" class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong>Kan ikke registrere telefonnummer!</strong> Telefonnummer har ugyldig format eller er registrert på en annen person allerede.
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close" (click)="showRegistreringAlert=false">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="dropdown mb-2">
+  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <span *ngIf="!valgtKommune">Velg kommune</span>
+    <span *ngIf="valgtKommune">{{valgtKommune.navn}}</span>
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <button *ngIf="valgtKommune" (click)="velgKommune()" class="dropdown-item" type="button">Velg kommune</button>
+    <button *ngFor="let kommune of kommuneList" (click)="velgKommune(kommune)" class="dropdown-item" type="button">{{kommune.navn}}</button>
+  </div>
+</div>
+
+<div *ngIf="!laster">
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Opprettet</th>
+        <th scope="col">Kommune</th>
+        <th scope="col">Fødselsnummer</th>
+        <th scope="col">Telefonnummer</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr scope="row" *ngFor="let manglendeKontaktInfo of manglerKontaktinfoListe.resultater; let i=index">
+        <td>{{i+1}}</td>
+        <td>{{manglendeKontaktInfo.indekspasient.opprettettidspunkt | date:'dd.MM.yyyy HH:mm'}}</td>
+        <td>{{hentKommuneFor(manglendeKontaktInfo)}}</td>
+        <td>{{erDekryptert(manglendeKontaktInfo) ? fodselsnummerFor(manglendeKontaktInfo) : '****'}}</td>
+        <td><input type="text" class="form-control" [disabled]="!erDekryptert(manglendeKontaktInfo)" [(ngModel)]="manglendeKontaktInfo.nyttTelefonnummer"></td>
+        <td>
+          <button *ngIf="!erDekryptert(manglendeKontaktInfo)" class="btn btn-primary" (click)="dekrypter(manglendeKontaktInfo)">Dekrypter</button>
+          <button *ngIf="erDekryptert(manglendeKontaktInfo)" class="btn btn-primary mr-2" [disabled]="!manglendeKontaktInfo.nyttTelefonnummer" (click)="lagre(manglendeKontaktInfo)">Lagre</button>
+          <button *ngIf="erDekryptert(manglendeKontaktInfo)" class="btn btn-secondary" [disabled]="manglendeKontaktInfo.nyttTelefonnummer" (click)="lagreIkkeFunnet(manglendeKontaktInfo)">Ikke funnet</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <ngb-pagination
+    [(page)]="aktivSide"
+    [pageSize]="manglerKontaktinfoListe.sideantall"
+    [collectionSize]="manglerKontaktinfoListe.totaltAntall"
+    [maxSize]="5"
+    [boundaryLinks]="true"
+    >
+  </ngb-pagination>
+</div>

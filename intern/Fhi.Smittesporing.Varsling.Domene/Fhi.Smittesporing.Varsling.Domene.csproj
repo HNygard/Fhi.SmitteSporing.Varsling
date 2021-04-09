@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="EPPlus" Version="5.1.1" />
+    <PackageReference Include="MediatR" Version="8.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.3" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.3" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
+    <PackageReference Include="NuGet.CommandLine" Version="5.4.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Optional" Version="4.0.0" />
+    <PackageReference Include="Optional.Async" Version="1.3.0" />
+    <PackageReference Include="System.Runtime.Caching" Version="4.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\felles\Fhi.Smittesporing.Varsling.Felles.Applikasjonsmodell\Fhi.Smittesporing.Varsling.Felles.Applikasjonsmodell.csproj" />
+    <ProjectReference Include="..\..\felles\Fhi.Smittesporing.Varsling.Felles.Domene\Fhi.Smittesporing.Varsling.Felles.Domene.csproj" />
+    <ProjectReference Include="..\..\simula\felles\Fhi.Smittesporing.Simula.Applikasjonsmodell\Fhi.Smittesporing.Simula.Applikasjonsmodell.csproj" />
+    <ProjectReference Include="..\Fhi.Smittesporing.Varsling.Applikasjonsmodell\Fhi.Smittesporing.Varsling.Applikasjonsmodell.csproj" />
+  </ItemGroup>
+
+</Project>

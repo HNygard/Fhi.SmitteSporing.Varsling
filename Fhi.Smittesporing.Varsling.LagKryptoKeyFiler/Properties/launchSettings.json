@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Fhi.Smittesporing.Varsling.LagKryptoKeyFiler": {
+      "commandName": "Project",
+      "commandLineArgs": "TestPassord d:\\krypttest"
+    }
+  }
+}

@@ -1,0 +1,85 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+  branches:
+    include:
+    - master
+    - develop
+    - feature/*
+  paths:
+    include:
+      - felles/*
+      - intern/*
+      - simula/felles/*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  prosjekterTilBygging: |
+    felles/**/*.csproj
+    intern/**/*.csproj
+  prosjekterTilTesting: |
+    felles/**/*.Tester.csproj
+    intern/**/*.Test.csproj
+  prosjektTilPublisering: '**/Fhi.Smittesporing.Varsling.Intern.csproj'
+  publisertPakkenavn: 'Fhi.Smittesporing.Varsling.Intern'
+  Version.Major: 1
+  Version.Minor: 0
+  Version.Revision: $[counter(format('{0}.{1}', variables['Version.Major'], variables['Version.Minor']), 0)]
+  Version.Suffix: $[format('-{0}', variables['Build.SourceBranchName'])]
+
+name: $(Version.Major).$(Version.Minor).$(Version.Revision)$(Version.Suffix)
+
+steps:
+- task: UseNode@1
+  inputs:
+    version: '13.9.0'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Installer nuget-pakker'
+  inputs:
+    command: 'restore'
+    projects: '$(prosjekterTilBygging)'
+    feedsToUse: 'config'
+    nugetConfigPath: 'NuGet.Config'
+    externalFeedCredentials: 'FHI Nuget - Read'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Bygg alle prosjekter'
+  inputs:
+    command: 'build'
+    projects: '$(prosjekterTilBygging)'
+    arguments: '--no-restore --configuration $(buildConfiguration) /property:Version=$(Version.Major).$(Version.Minor).$(Version.Revision)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Kjør tester'
+  inputs:
+    command: 'test'
+    projects: '$(prosjekterTilTesting)'
+    arguments: '--no-build --configuration $(buildConfiguration) --collect:"XPlat Code Coverage" --settings intern/coverlet.runsettings'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Pakk webapp'
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    projects: '$(prosjektTilPublisering)'
+    arguments: '--no-build --output $(build.artifactstagingdirectory) --configuration $(buildConfiguration)'
+
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publiser testdekningsresultater'
+  inputs:
+    codeCoverageTool: 'Cobertura'
+    summaryFileLocation: '$(Agent.TempDirectory)/*/coverage.cobertura.xml'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publiser artifakter'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: '$(publisertPakkenavn)'
+    publishLocation: 'Container'

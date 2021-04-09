@@ -1,0 +1,136 @@
+<h2>SMS-varsel</h2>
+
+<div class="card">
+    <div class="card-body">
+        <h3 class="card-title">Meldingsmal</h3>
+        <div *ngIf="smsMal">
+            <app-sms-mal-editor [smsMal]="smsMal" [flettefelter]="flettefelter"></app-sms-mal-editor>
+            <button class="btn btn-primary" (click)="lagreSmsMal()">Lagre</button>
+            {{smsMalStatus}}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h3 class="card-title">Fletteinnstillinger</h3>
+        <table class="table tilfelletable" *ngIf="fletteinnstillinger">
+            <thead></thead>
+            <tbody>
+                <tr>
+                    <th scope="row" class="text-center" colspan="2">Risikotekster (flettefelt: {{'{risikoTekst}'}})</th>
+                </tr>
+                <tr>
+                    <th scope="row">low</th>
+                    <td>
+                        <textarea class="form-control" name="risikoLav" id="risikoLav" rows="4" [(ngModel)]="fletteinnstillinger.lavRisikokategori"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">medium</th>
+                    <td>
+                        <textarea class="form-control" name="risikoMiddels" id="risikoMiddels" rows="4" [(ngModel)]="fletteinnstillinger.middelsRisikokategori"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">high</th>
+                    <td>
+                        <textarea class="form-control" name="risikoHoy" id="risikoHoy" rows="4" [(ngModel)]="fletteinnstillinger.hoyRisikokategori"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row" class="text-center" colspan="2">Kommunetekst (flettefelt: {{'{kommuneInfo}'}})</th>
+                </tr>
+                <tr>
+                    <th scope="row">Standardtekst</th>
+                    <td>
+                        <textarea class="form-control" name="kommuneFallback" id="kommuneFallback" rows="4" [(ngModel)]="fletteinnstillinger.kommuneinfoFallback"></textarea>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn btn-primary" (click)="lagreFletteinnstillinger()">Lagre</button>
+        {{flettinnstillingerStatus}}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h3 class="card-title">Kommunetekster (flettefelt: {{ '{kommuneInfo}' }})</h3>
+        Velg kommune for å angi eget innhold i SMS-varsler som overstyrer standardteksten.
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span *ngIf="!valgtKommuneSmsInfo">Velg kommune</span>
+                <span *ngIf="valgtKommuneSmsInfo">{{valgtKommuneSmsInfo.navn}}</span>
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <button *ngFor="let kommune of kommuner" (click)="valgtKommuneSmsInfo = kommune" class="dropdown-item" type="button">{{kommune.navn}}</button>
+            </div>
+        </div>
+        <textarea #kommuneSmsInfo="ngModel" class="form-control" name="valgtKommuneSmsInfoTekst" id="valgtKommuneSmsInfoTekst" rows="4" [(ngModel)]="valgtKommuneSmsInfoTekst"></textarea>
+        <button class="btn btn-primary" (click)="lagreKommunetekst()" [disabled]="!valgtKommuneSmsInfo || kommuneSmsInfo.errors">Lagre</button>
+        {{kommuneInfoStatus}}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h3 class="card-title">Testutsending</h3>
+        <div class="form-group">
+            <label for="testTelefonnummer">Telefonnummer</label>
+            <input type="text" #testTlf="ngModel" class="form-control" id="testTelefonnummer" name="testTelefonnummer" [(ngModel)]="testTelefonnummer" aria-describedby="testTelefonnummerHjelp" required pattern="^\+?\d{5,15}$">
+            <small id="testTelefonnummerHjelp" class="form-text text-muted">Telefonnummer som skal motta testmelding.</small>
+        </div>
+        <div class="testmelding-controls">
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span *ngIf="!testKommune">Velg kommune</span>
+                    <span *ngIf="testKommune">{{testKommune.navn}}</span>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <button (click)="testKommune = null" class="dropdown-item" type="button">Ukjent kommune</button>
+                    <button *ngFor="let kommune of kommuner" (click)="testKommune = kommune" class="dropdown-item" type="button">{{kommune.navn}}</button>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span *ngIf="!testRisikokategori">Velg risikokategori</span>
+                    <span *ngIf="testRisikokategori">{{testRisikokategori}}</span>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <button (click)="testRisikokategori = null" class="dropdown-item" type="button">Udefinert/Annet</button>
+                    <button *ngFor="let risikokategori of risikokategorier"
+                        (click)="testRisikokategori = risikokategori"
+                        class="dropdown-item" type="button">
+                        {{risikokategori}}
+                    </button>
+                </div>
+            </div>
+            <button class="btn btn-primary" (click)="sendTestmelding()" [disabled]="!erLagret || testTlf.errors">Send Testmelding</button>
+            {{senderTestmelding ? 'Sender...' : ''}}
+            {{testmeldingSendt ? 'Sendt til SMS-tjenesten :)' : ''}}
+            {{testmeldingFeilet ? 'Noe gikk galt ved sending til SMS-tjenesten :(' : ''}}
+        </div>
+        <div *ngIf="testmeldingshendelser && testmeldingshendelser.length">
+            Status: {{testmeldingshendelser[0].gjeldeneStatus || 'Ukjent'}}<br />
+            Antall delmeldinger: {{testmeldingshendelser[0].antallSegmenter || 'Ukjent'}}
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Tidspunkt</th>
+                        <th scope="col">Beskrivelse</th>
+                        </tr>
+                  </thead>
+                  <tbody>
+                        <tr scope="row" *ngFor="let smittetilfelle of testmeldingshendelser; let i=index">
+                            <td>{{i+1}}</td>
+                            <td>{{smittetilfelle.tidspunkt | date:'dd.MM.yyyy HH:mm'}}</td>
+                            <td>{{smittetilfelle.beskrivelse}}</td>
+                        </tr>
+                  </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

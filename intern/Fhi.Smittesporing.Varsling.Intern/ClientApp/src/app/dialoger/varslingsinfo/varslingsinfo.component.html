@@ -1,0 +1,29 @@
+<div class="modal-header">
+	<h4 class="modal-title">Varslingsinfo</h4>
+	<button type="button" class="close" aria-label="Close" (click)="activeModal.close(false)">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+<div class="modal-body">
+	<table class="table table-hover text-center">
+	<thead>
+	<tr>
+		<th scope="col">#</th>
+		<th scope="col">Opprettet</th>
+		<th scope="col">Status</th>
+		<th scope="col">Oppdatert</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr scope="row" *ngFor="let varsel of smsVarsler; let i=index">
+		<td>{{i+1}}</td>
+		<td>{{varsel.created | date:'dd.MM.yyyy HH:mm'}}</td>
+		<td>{{varsel.status}}</td>
+		<td>{{varsel.SisteEksterneHendelsestidspunkt || varsel.sistOppdatert | date:'dd.MM.yyyy HH:mm'}}</td>
+	</tr>
+	</tbody>
+	</table>
+</div>
+<div class="modal-footer">
+	<button type="button" class="btn btn-primary" (click)="activeModal.close(false)">Lukk</button>
+</div>

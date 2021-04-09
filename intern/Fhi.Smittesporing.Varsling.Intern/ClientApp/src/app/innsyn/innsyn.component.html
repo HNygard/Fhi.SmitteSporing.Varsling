@@ -1,0 +1,292 @@
+<div class="row">
+  <div class="col-6">
+    <div class="form-group">
+      <label for="telefonnummer">Telefonnummer</label>
+      <input type="text"
+             [(ngModel)]="telefonnummer"
+             class="form-control"
+             required
+             pattern="^\+?\d{5,15}$"
+             #tlf="ngModel"
+             [class.is-invalid]="!tlf.valid"
+             [class.is-valid]="tlf.valid"
+             />
+      <small class="form-text text-muted">5 til 15 siffer. Du kan starte med +.</small>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="form-group">
+      <label>Fødselsnummer</label>
+      <input type="text"
+             #fnr="ngModel"
+             [(ngModel)]="fodselsnummer"
+             [class.is-invalid]="fnr.invalid" [class.is-valid]="fnr.valid"
+             class="form-control"
+             required
+             nationalid
+             pattern="[0-9]{11}" />
+      <!--<small class="form-text text-muted">11 siffer</small>-->
+      <div class="invalid-feedback" [hidden]="fnr.valid">
+        Ugyldig fødselsnummer.
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="showAlert" class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong>En feil oppstod!</strong> Søket ble enten ikke utført eller mangler data.
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close" (click)="showAlert=false">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="row">
+  <div class="col-12">
+    <button (click)="search()" class="btn btn-primary" [disabled]="tlf.invalid || fnr.invalid">Søk</button>
+    <button (click)="eksporter()" class="btn btn-secondary ml-1" [disabled]="tlf.invalid || fnr.invalid || showAlert">Eksporter til Excel</button>
+  </div>
+</div>
+
+<ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs mt-3">
+  <li [ngbNavItem]="1">
+    <a ngbNavLink [class.text-danger]="failedInnhold">Innhold<span [class.invisible]="!failedInnhold" class="text-danger"> ! </span></a>
+    <ng-template ngbNavContent>
+      <div *ngIf="smittekontakter">
+        <h2>Smittekontakter</h2>
+        <div>Antall: {{smittekontakter.totaltAntall}}</div>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Opprettet</th>
+              <th scope="col">Varslet</th>
+              <th scope="col">Risikokategori</th>
+              <th scope="col">Antall Kontakter</th>
+              <th scope="col">Akk. Risk GPS</th>
+              <th scope="col">Akk. Risk BT</th>
+              <th scope="col">Akk. Varighet</th>
+              <th scope="col">Verifiseringskode</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr scope="row" *ngFor="let kontakt of smittekontakter.resultater; let i=index">
+              <td>{{i+1+(smittekontakter.sideindeks*smittekontakter.sideantall)}}</td>
+              <td>{{kontakt.created | date:'dd.MM.yyyy HH:mm'}}</td>
+              <td>{{kontakt.varsletTidspunkt | date:'dd.MM.yyyy HH:mm'}}</td>
+              <td>{{kontakt.risikokategori}}</td>
+              <td>{{kontakt.antallKontakter}}</td>
+              <td>{{kontakt.gpsAkkumulertRisikoscore | number:'1.2-5'}}</td>
+              <td>{{kontakt.bluetoothAkkumulertRisikoscore | number:'1.2-5'}}</td>
+              <td>{{kontakt.bluetoothAkkumulertVarighet + kontakt.gpsAkkumulertVarighet | appDuration}}</td>
+              <td>{{kontakt.verifiseringskode}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ngb-pagination [(page)]="aktivSideSmittekontakter"
+                        [pageSize]="smittekontakter.sideantall"
+                        [collectionSize]="smittekontakter.totaltAntall"
+                        [maxSize]="5"
+                        [boundaryLinks]="true">
+        </ngb-pagination>
+      </div>
+
+      <div *ngIf="indekspasienter">
+        <h2>Indekspasienter</h2>
+        <div>Antall: {{indekspasienter.totaltAntall}}</div>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Opprettet</th>
+              <th scope="col">Opprettettidspunkt</th>
+              <th scope="col">Prøvedato</th>
+              <th scope="col">Kommune</th>
+              <th scope="col">Status</th>
+              <th scope="col">Varslingsstatus</th>
+              <th scope="col">Kan godkjennes for varsling</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr scope="row" *ngFor="let pasient of indekspasienter.resultater; let i=index">
+              <td>{{i+1+(indekspasienter.sideindeks*indekspasienter.sideantall)}}</td>
+              <td>{{pasient.created | date:'dd.MM.yyyy HH:mm'}}</td>
+              <td>{{pasient.opprettettidspunkt | date:'dd.MM.yyyy HH:mm'}}</td>
+              <td>{{pasient.provedato | date:'dd.MM.yyyy HH:mm'}}</td>
+              <td>{{pasient.kommune}}</td>
+              <td>{{pasient.status}}</td>
+              <td>{{pasient.varslingsstatus}}</td>
+              <td>{{pasient.kanGodkjennesForVarsling}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ngb-pagination [(page)]="aktivSideIndeksPasienter"
+                        [pageSize]="indekspasienter.sideantall"
+                        [collectionSize]="indekspasienter.totaltAntall"
+                        [maxSize]="5"
+                        [boundaryLinks]="true">
+        </ngb-pagination>
+      </div>
+      <div *ngIf="smsvarsler">
+        <h2>Smsvarsler</h2>
+        <div>Antall: {{smsvarsler.totaltAntall}}</div>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Status</th>
+              <th scope="col">Created</th>
+              <th scope="col">Referanse</th>
+              <th scope="col">SisteEksterneHendelsestidspunkt</th>
+              <th scope="col">SistOppdatert</th>
+              <th scope="col">OpprettetAv</th>
+              <th scope="col">SistOppdatertAv</th>
+              <th scope="col">Verifiseringskode</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr scope="row" *ngFor="let varsel of smsvarsler.resultater; let i=index">
+              <td>{{i+1+(smsvarsler.sideindeks*smsvarsler.sideantall)}}</td>
+              <td>{{varsel.status}}</td>
+              <td>{{varsel.created | date:'dd.MM.yyyy HH:mm'}}</td>
+              <td>{{varsel.referanse}}</td>
+              <td>{{varsel.sisteEksterneHendelsestidspunkt | date:'dd.MM.yyyy HH:mm'}}</td>
+              <td>{{varsel.sistOppdatert | date:'dd.MM.yyyy HH:mm'}}</td>
+              <td>{{varsel.opprettetAv}}</td>
+              <td>{{varsel.sistOppdatertAv}}</td>
+              <td>{{varsel.verifiseringskode}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ngb-pagination [(page)]="aktivSideSmsVarsler"
+                        [pageSize]="smsvarsler.sideantall"
+                        [collectionSize]="smsvarsler.totaltAntall"
+                        [maxSize]="5"
+                        [boundaryLinks]="true">
+        </ngb-pagination>
+      </div>
+    </ng-template>
+  </li>
+  <li [ngbNavItem]="2">
+    <a ngbNavLink [class.text-danger]="failedLogg">Logg Over Bruk<span [class.invisible]="!failedLogg" class="text-danger"> ! </span></a>
+    <ng-template ngbNavContent>
+      <div *ngIf="logg">
+        <div>Antall: {{logg.totaltAntall}}</div>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Created</th>
+              <th scope="col">Hvem</th>
+              <th scope="col">Felt</th>
+              <th scope="col">Hva</th>
+              <th scope="col">Hvorfor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr scope="row" *ngFor="let innsynlogg of logg.resultater; let i=index">
+              <td>{{i+1+(logg.sideindeks*logg.sideantall)}}</td>
+              <td>{{innsynlogg.created | date:'dd.MM.yyyy HH:mm'}}</td>
+              <td>{{innsynlogg.hvem}}</td>
+              <td>{{innsynlogg.felt}}</td>
+              <td>{{innsynlogg.hva}}</td>
+              <td>{{innsynlogg.hvorfor}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ngb-pagination [(page)]="aktivSideLogg"
+                        [pageSize]="logg.sideantall"
+                        [collectionSize]="logg.totaltAntall"
+                        [maxSize]="5"
+                        [boundaryLinks]="true">
+        </ngb-pagination>
+      </div>
+    </ng-template>
+  </li>
+  <li [ngbNavItem]="3">
+    <a ngbNavLink [class.text-danger]="failedSimulagpsdata">Innhold (Simula)<span [class.invisible]="!failedSimulagpsdata" class="text-danger"> ! </span></a>
+    <ng-template ngbNavContent>
+      <h2>Simula gpsdata</h2>
+      <p *ngIf="!simulagpsdata">
+        Ingenting hentet enda.
+      </p>
+      <div *ngIf="simulagpsdata">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Fratidspunkt</th>
+              <th scope="col">Tiltidspunkt</th>
+              <th scope="col">Breddegrad</th>
+              <th scope="col">Hastighet</th>
+              <th scope="col">Høyde</th>
+              <th scope="col">Høyde nøyaktighet</th>
+              <th scope="col">Lengdegrad</th>
+              <th scope="col">Nøyaktighet</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr scope="row" *ngFor="let gps of simulagpsdata.resultater; let i=index">
+              <td>{{i+1+(simulagpsdata.sideindeks*simulagpsdata.sideantall)}}</td>
+              <td>{{gps.fraTidspunkt | date:'dd.MM.yyyy HH:mm'}}</td>
+              <td>{{gps.tilTidspunkt | date:'dd.MM.yyyy HH:mm'}}</td>
+              <td>{{gps.breddegrad | number:'1.2-5'}}</td>
+              <td>{{gps.hastighet | number:'1.2-5'}}</td>
+              <td>{{gps.hoyde | number:'1.2-5'}}</td>
+              <td>{{gps.hoydeNoyaktighet | number:'1.2-5'}}</td>
+              <td>{{gps.lengdegrad | number:'1.2-5'}}</td>
+              <td>{{gps.noyaktighet | number:'1.2-5'}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ngb-pagination [(page)]="aktivSideSimulaGpsData"
+                        [pageSize]="simulagpsdata.sideantall"
+                        [collectionSize]="simulagpsdata.totaltAntall"
+                        [maxSize]="5"
+                        [boundaryLinks]="true">
+        </ngb-pagination>
+      </div>
+    </ng-template>
+  </li>
+  <li [ngbNavItem]="4">
+    <a ngbNavLink [class.text-danger]="failedSimuladatabruk">Logg Over Bruk (Simula)<span [class.invisible]="!failedSimuladatabruk" class="text-danger"> ! </span></a>
+    <ng-template ngbNavContent>
+      <div *ngIf="simuladatabruk">
+        <div>Antall: {{simuladatabruk.totaltAntall}}</div>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Tidspunkt</th>
+              <th scope="col">Telefonnummer</th>
+              <th scope="col">PersonNavn</th>
+              <th scope="col">PersonOrganisasjon</th>
+              <th scope="col">PersonIdentifikator</th>
+              <th scope="col">TekniskOrganisasjon</th>
+              <th scope="col">RettsligFormal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr scope="row" *ngFor="let databruk of simuladatabruk.resultater; let i=index ">
+              <td>{{i+1+(simuladatabruk.sideindeks*simuladatabruk.sideantall)}}</td>
+              <td>{{databruk.tidspunkt | date:'dd.MM.yyyy HH:mm'}}</td>
+              <td>{{databruk.tilknyttetTelefonnummer}}</td>
+              <td>{{databruk.personNavn}}</td>
+              <td>{{databruk.personOrganisasjon}}</td>
+              <td>{{databruk.personIdentifikator}}</td>
+              <td>{{databruk.tekniskOrganisasjon}}</td>
+              <td>{{databruk.rettsligFormal}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ngb-pagination [(page)]="aktivSideSimulaDatabruk"
+                        [pageSize]="simuladatabruk.sideantall"
+                        [collectionSize]="simuladatabruk.totaltAntall"
+                        [maxSize]="5"
+                        [boundaryLinks]="true">
+        </ngb-pagination>
+      </div>
+
+    </ng-template>
+  </li>
+</ul>
+
+<div [ngbNavOutlet]="nav" class="mt-3"></div>
+

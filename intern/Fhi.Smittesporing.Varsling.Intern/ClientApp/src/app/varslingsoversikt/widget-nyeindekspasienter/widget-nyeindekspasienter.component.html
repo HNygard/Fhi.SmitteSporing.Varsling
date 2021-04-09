@@ -1,0 +1,22 @@
+<div class="card" style="width:30rem; height:23rem">
+  <h4 class="card-header">Nye indekspasienter i <span *ngIf="totalOversikt">Norge</span> <span *ngIf="!totalOversikt && kommune">{{kommune.navn}}</span></h4>
+  <div class="card-body">
+    <div *ngIf="isLoading">
+      Laster...
+    </div>
+    <div *ngIf="!isLoading">
+      <label style="font-size: 25px">{{antallSmittetilfelleRapport?.antallSisteDag}}</label> registrert i dag<span *ngIf="antallSmittetilfelleRapport?.antallSisteDag">, siste kl. <strong>{{antallSmittetilfelleRapport?.sisteOpprettet | date: 'HH:mm'}}</strong></span>
+      <div style="display: block" *ngIf="!isLoading">
+        <canvas baseChart
+                [datasets]="antallSmittetilfelleRapport.chartData.series"
+                [labels]="antallSmittetilfelleRapport.chartData.labels"
+                [colors]="lineChartColors"
+                [chartType]="chartType"></canvas>
+      </div>
+      <p class="card-text pt-2">
+        <small class="float-right" *ngIf="antallSmittetilfelleRapport?.generertdato"><i>Sist oppdatert: {{antallSmittetilfelleRapport?.generertdato | amTimeAgo}}</i></small>
+      </p>
+    </div>
+
+  </div>
+</div>

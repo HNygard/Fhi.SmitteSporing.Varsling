@@ -1,0 +1,18 @@
+
+<div class="form-group">
+    <label for="avsender">Avsender</label>
+    <input type="text" class="form-control" id="avsender" name="avsender" [(ngModel)]="smsMal.avsender" aria-describedby="avsenderHjelp" pattern="^[A-Za-z0-9]{1,11}$">
+    <small id="avsenderHjelp" class="form-text text-muted">Avsender som vises for SMS-en som sendes. A-Z eller tall tilatt. Maks 11 tegn.</small>
+</div>
+<div class="form-group">
+    <label for="meldingsinnhold">Meldingsinnhold</label>
+    <select class="form-control" id="flettefeltSelect" [(ngModel)]="valgtFlettefelt">
+        <option value="">Velg flettefelt for innsetting</option>
+        <option *ngFor="let f of flettefelter" [value]="f.placeholder">{{f.navn}} ({{f.beskrivelse}} - Eksempel: {{f.eksempelverdi}})</option>
+    </select>
+    <textarea class="form-control" name="meldingsinnhold" id="meldingsinnhold" rows="15" [(ngModel)]="smsMal.meldingsinnhold"></textarea>
+    {{smsLendgeInfo}}
+    <div class="alert alert-warning" *ngIf="harTegnUtenforGsmTegnsett">
+        Meldingen inneholder tegn utenfor tegnsettet til GSM og tegn per delmelding er dermed redusert til 70 for første melding, deretter 67.
+    </div>
+</div>

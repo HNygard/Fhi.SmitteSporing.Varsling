@@ -1,0 +1,103 @@
+<div class="row">
+
+  <div class="col">
+    <app-widget-nyeindekspasienter [kommune]="valgtKommune" [totalOversikt]="true"></app-widget-nyeindekspasienter>
+  </div>
+
+  <div class="col">
+    <div *ngIf="!valgtKommune" class="card" style="width:30rem; height:23rem">
+      <h4 class="card-header">Nye indekspasienter i valgt kommune</h4>
+      <div class="card-body">
+
+        <p class="card-text text-center align-middle mt-5">
+          Velg kommune
+        </p>
+      </div>
+    </div>
+    <app-widget-nyeindekspasienter *ngIf="valgtKommune" [kommune]="valgtKommune" [totalOversikt]="false"></app-widget-nyeindekspasienter>
+  </div>
+</div>
+
+<h2>Varsler til godkjenning</h2>
+
+<div class="row mt-3">
+  <div class="col-2">
+    <div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span *ngIf="!valgtKommune">Velg kommune</span>
+        <span *ngIf="valgtKommune">{{valgtKommune.navn}}</span>
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <button *ngIf="valgtKommune" (click)="velgKommune()" class="dropdown-item" type="button">Velg kommune</button>
+        <button *ngFor="let kommune of kommuneList" (click)="velgKommune(kommune)" class="dropdown-item" type="button">{{kommune.navn}}</button>
+      </div>
+    </div>
+  </div>
+  <div class="col-10">
+    <div class="text-right">
+      <button [disabled]="erBunkeTom()" class="btn btn-primary" (click)="godkjennVarslingForValgte()">Godkjenn ({{indekspasienterValgtTilGodkjenning?.length}})</button>
+    </div>
+  </div>
+</div>
+<hr />
+
+<div *ngIf="showGodkjenningAlert" class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong>En feil har oppstått!</strong> En eller flere angitte tilfeller kan ikke godkjennes for varsling.
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close" (click)="showGodkjenningAlert=false">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="row" *ngIf="laster"><div class="col">Laster...</div></div>
+<div class="row" *ngIf="!laster">
+  <div class="col">
+    <div class="row">
+      <div class="col" *ngIf="indekspasientListe">Antall: {{indekspasientListe.totaltAntall}}</div>
+      <div class="col">
+        <div class="text-right">
+          <div class="form-group form-check">
+            <input type="checkbox" (change)="onChangeVelgAlle($event.target.checked)">
+            <label class="form-check-label ml-1" for="exampleCheck1">Velg alle/ingen</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <table class="table table-hover text-center">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">ID</th>
+          <th scope="col">Opprettet</th>
+          <th scope="col">Kommune</th>
+          <th scope="col">Antall smittekontakter</th>
+          <th scope="col">Varsling</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr scope="row" *ngFor="let indekspasient of indekspasientListe.resultater; let i=index" (click)="velgIndekspasient(indekspasient)"
+            [class.table-active]="indekspasient.indekspasientId === valgtIndekspasient?.indekspasientId">
+          <td [routerLink]="['indekspasienter', indekspasient.indekspasientId]">{{i+1+(indekspasientListe.sideindeks*indekspasientListe.sideantall)}}</td>
+          <td [routerLink]="[indekspasient.indekspasientId]">{{indekspasient.indekspasientId}}</td>
+          <td [routerLink]="['indekspasienter', indekspasient.indekspasientId]">{{indekspasient.opprettettidspunkt | date:'dd.MM.yyyy HH:mm'}}</td>
+          <td [routerLink]="['indekspasienter', indekspasient.indekspasientId]">{{hentKommuneFor(indekspasient)}}</td>
+          <td [routerLink]="['indekspasienter', indekspasient.indekspasientId]">{{indekspasient.antallSmittekontakter}}</td>
+          <td>
+            <input type="checkbox" class="form-check-input"
+              [disabled]="!indekspasient.kanGodkjennesForVarsling"
+              [checked]="erValgt(indekspasient)"
+              (change)="onChangeValgtSmittetilfelle(indekspasient, $event.target.checked)"
+              (click)="$event.stopPropagation()" />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <ngb-pagination
+      [(page)]="aktivSide"
+      [pageSize]="indekspasientListe.sideantall"
+      [collectionSize]="indekspasientListe.totaltAntall"
+      [maxSize]="5"
+      [boundaryLinks]="true"
+      >
+    </ngb-pagination>
+  </div>
+</div>
